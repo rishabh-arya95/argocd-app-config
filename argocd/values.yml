@@ -1,0 +1,210 @@
+fullnameOverride: argocd
+
+crds:
+  install: true
+  keep: false # this will remove all crds when helm is uninstalled
+
+redis-ha:
+  enabled: true
+  exporter:
+    enabled: false
+
+
+  haproxy:
+  # -- Enabled HAProxy LoadBalancing/Proxy
+    # enabled: true
+    metrics:
+      # -- HAProxy enable prometheus metric scraping
+      enabled: false
+
+controller:
+  replicas: 1
+
+  tolerations:
+    - key: workload
+      operator: Equal
+      value: utility
+      effect: NoSchedule
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: workload
+            operator: In
+            values:
+            - utility
+  nodeSelector:
+    workload: utility
+
+  resources:
+    limits:
+      cpu: '2'
+      memory: 2Gi
+    requests:
+      cpu: 250m
+      memory: 1Gi
+
+  serviceAccount:
+    create: true
+    automountServiceAccountToken: true
+
+  metrics:
+    enabled: false
+
+server:
+  autoscaling:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 2
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 70
+
+    behavior: {}
+      # scaleDown:
+      # stabilizationWindowSeconds: 300
+      # policies:
+      #   - type: Pods
+      #     value: 1
+      #     periodSeconds: 180
+      # scaleUp:
+      #   stabilizationWindowSeconds: 300
+      #   policies:
+      #   - type: Pods
+      #     value: 2
+      #     periodSeconds: 60
+
+    limits:
+      cpu: 500m
+      memory: 256Mi
+    requests:
+      cpu: 125m
+      memory: 128Mi
+
+  # certificate:
+  #   enabled: true
+  #   # -- Certificate primary domain (commonName)
+  #   domain: stage-argo.hyperexecute.lambdatest.com
+  #   # -- The requested 'duration' (i.e. lifetime) of the Certificate. Value must be in units accepted by Go time.ParseDuration
+  #   duration: ""
+  #   # -- How long before the currently issued certificate's expiry cert-manager should renew the certificate. Value must be in units accepted by Go time.ParseDuration
+  #   renewBefore: ""
+  #   issuer:
+  #     # -- Certificate issuer group. Set if using an external issuer. Eg. `cert-manager.io`
+  #     # group: "cert-manager.io/v1"
+  #     # -- Certificate issuer kind. Either `Issuer` or `ClusterIssuer`
+  #     kind: "ClusterIssuer"
+  #     # -- Certificate isser name. Eg. `letsencrypt`
+  #     name: "letsencrypt"
+  #   secretName: argocd-server-tls
+  metrics:
+    enabled: false
+
+  ingress:
+    enabled: true
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt
+      kubernetes.io/tls-acme: "true"
+      nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+      nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+    ingressClassName: "nginx"
+    hosts:
+      - stage-argo.hyperexecute.lambdatest.com
+    tls:
+      - secretName: argocd-tls-certificate
+        hosts:
+          - stage-argo.hyperexecute.lambdatest.com
+    https: true
+    ## to add grpc you have to add a new ingress
+
+
+repoServer:
+  autoscaling:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 2
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 70
+  resources:
+    limits:
+      cpu: '1'
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+  tolerations:
+    - key: workload
+      operator: Equal
+      value: utility
+      effect: NoSchedule
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: workload
+            operator: In
+            values:
+            - utility
+  nodeSelector:
+    workload: utility
+  clusterAdminAccess:
+    enabled: true
+
+applicationSet:
+  replicas: 1
+  resources:
+    limits:
+      cpu: '2'
+      memory: 1Gi
+    requests:
+      cpu: 250m
+      memory: 512Mi
+  tolerations:
+    - key: workload
+      operator: Equal
+      value: utility
+      effect: NoSchedule
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: workload
+            operator: In
+            values:
+            - utility
+  nodeSelector:
+    workload: utility
+
+dex:
+  enabled: true
+  metrics:
+    enabled: false
+  serviceAccount:
+    create: true
+
+  tolerations:
+    - key: workload
+      operator: Equal
+      value: utility
+      effect: NoSchedule
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: workload
+            operator: In
+            values:
+            - utility
+  nodeSelector:
+    workload: utility
+
+  resources:
+    limits:
+      cpu: 500m
+      memory: 256Mi
+    requests:
+      cpu: 250m
+      memory: 128Mi

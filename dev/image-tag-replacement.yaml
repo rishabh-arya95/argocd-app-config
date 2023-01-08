@@ -9,3 +9,8 @@ targets:
   fieldPaths:
     # - spec.template.spec.containers.[name=my-container].image
     - metadata.labels.foo
+- select:
+    kind: Service
+  fieldPaths:
+    # - spec.template.spec.containers.[name=my-container].image
+    - metadata.labels.foo

@@ -1,0 +1,9 @@
+data:
+  configManagementPlugins: |-
+    - name: kustomized-helm
+      generate:
+        command: ["/bin/sh", "-c"]
+        args: ["IMAGETAG=${FOO} kustomize build"]
+
+# kubectl patch cm argocd-cm -n argocd --patch-file argocd/base/patch/argo-cd-cm.yaml
+# kubectl rollout  restart  deployment/argocd-repo-server -n argocd 
