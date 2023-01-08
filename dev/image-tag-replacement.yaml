@@ -1,0 +1,11 @@
+source:
+  kind: ConfigMap
+  name: env-var
+  fieldPath: data.FOO
+  version: v1
+targets:
+- select:
+    kind: Deployment
+  fieldPaths:
+    # - spec.template.spec.containers.[name=my-container].image
+    - metadata.foo
